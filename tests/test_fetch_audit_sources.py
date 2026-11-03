@@ -7,6 +7,7 @@ import csv
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -249,6 +250,10 @@ class GitTests(unittest.TestCase):
 
     def test_lock_refuses_a_folder_git_cannot_read(self):
         lock_path, folder = self.locked_folder()
+        # Git marks its pack files read-only, and Windows won't delete those.
+        for parent, _folders, files in os.walk(folder / ".git"):
+            for name in files:
+                os.chmod(Path(parent) / name, stat.S_IWRITE)
         shutil.rmtree(folder / ".git")
         data = json.loads(lock_path.read_text())
         environment = dict(os.environ, GIT_CEILING_DIRECTORIES=str(folder.parent))
