@@ -1,7 +1,7 @@
 {
   "name": "dependency-audit",
   "displayName": "Power Platform dependency audit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Read-only audits of what a Power Platform release needs that production doesn't have: Dataverse solutions, plug-ins, Power Pages, SharePoint and Azure Functions.",
   "author": {
     "name": "David Lorenzo López",

@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
-from solution_dependency_audit import ApiError, AuditError, ReadOnlyClient, split_command
+from solution_dependency_audit import ApiError, AuditError, ReadOnlyClient, make_output_safe, split_command
 
 __version__ = "1.0.0"
 
@@ -116,7 +116,7 @@ def git_environment(origin: str, token: Optional[str]) -> Dict[str, str]:
 def run_git(args: Sequence[str], env: Dict[str, str], extra_config: Sequence[str] = ()) -> str:
     command = ["git", *SAFE_GIT_CONFIG, *extra_config, *args]
     try:
-        result = subprocess.run(command, env=env, capture_output=True, text=True, timeout=GIT_TIMEOUT_SECONDS)
+        result = subprocess.run(command, env=env, capture_output=True, encoding="utf-8", errors="replace", timeout=GIT_TIMEOUT_SECONDS)
     except FileNotFoundError:
         raise AuditError("Git wasn't found. Install Git 2.31 or later.") from None
     except subprocess.TimeoutExpired:
@@ -178,7 +178,7 @@ def token_from_command(command: str) -> str:
         raise AuditError("The token command is empty")
     executable = shutil.which(parts[0]) or parts[0]
     try:
-        result = subprocess.run([executable] + parts[1:], capture_output=True, text=True, timeout=180)
+        result = subprocess.run([executable] + parts[1:], capture_output=True, encoding="utf-8", errors="replace", timeout=180)
     except (OSError, subprocess.SubprocessError) as exc:
         raise AuditError(f"Could not run the token command '{parts[0]}': {exc}") from None
     token = result.stdout.strip()
@@ -285,6 +285,7 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    make_output_safe()
     args = parse_args(argv)
     try:
         if args.command == "list-repos":

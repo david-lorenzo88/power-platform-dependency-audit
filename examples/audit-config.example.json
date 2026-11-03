@@ -1,0 +1,17 @@
+{
+  "targets": ["Core", "Sales"],
+  "dev": "https://contoso-dev.crm.dynamics.com",
+  "prod": "https://contoso.crm.dynamics.com",
+  "sandbox": "https://contoso-prodcopy.crm.dynamics.com",
+  "release": "https://contoso-release.crm.dynamics.com",
+  "includes": {
+    "power_pages": true,
+    "sharepoint": true,
+    "azure_functions": true,
+    "plugins": true
+  },
+  "azure_devops": [
+    { "organization": "contoso", "project": "App" }
+  ],
+  "power_pages_site_id": "00000000-0000-0000-0000-000000000000"
+}

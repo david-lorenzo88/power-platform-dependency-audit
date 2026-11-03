@@ -48,6 +48,7 @@ To see what the audit produces, look at the [sample output](examples/sample-outp
 | [`external_dependency_audit.py`](scripts/external_dependency_audit.py) | Audits SharePoint and Azure Functions | No, it only sends GET requests |
 | [`fetch_audit_sources.py`](scripts/fetch_audit_sources.py) | Lists Azure DevOps repositories and branches, and downloads the ones you choose | Only reads from Azure DevOps, and writes to your local folder |
 | [`stage_solution.py`](scripts/stage_solution.py) | Dry-runs an import on a sandbox | **Yes, on the sandbox only.** It uploads the file there |
+| [`check_setup.py`](scripts/check_setup.py) | Checks the tools, sign-ins and project folder, and validates `audit-config.json` | No |
 
 The [playbook](docs/playbook.md) has the decision questions and a fix for each type of dependency. The two [skills](skills) let Claude Code or GitHub Copilot CLI run the audits and ask the right questions.
 
@@ -115,7 +116,17 @@ git clone https://github.com/david-lorenzo88/power-platform-dependency-audit.git
 /plugin install dependency-audit@power-platform-dependency-audit
 ```
 
-This adds two skills: `solution-dependency-audit` and `external-dependency-audit`. The agent asks for the solutions, repositories and branches each time it runs, and follows the same steps as below. The plugin installs and validates in Claude Code. GitHub Copilot CLI reads the same manifest files, but this hasn't been tested yet.
+This adds two skills: `solution-dependency-audit` and `external-dependency-audit`. The plugin installs and validates in Claude Code. GitHub Copilot CLI reads the same manifest files, but this hasn't been tested yet.
+
+To start, open a session in the customer's private project folder and ask for the audit. [The agent then sets itself up](docs/agent-setup.md):
+
+1. **It checks your computer.** It runs `check_setup.py`, and tells you what to install or sign in to. You run the sign-ins yourself.
+2. **It shows who you're signed in as.** You confirm the account, tenant and project folder are the right customer's.
+3. **It asks about the release.** You give the solutions, the DEV, production and sandbox addresses, what the release includes, and the Azure DevOps projects.
+4. **It saves your answers in `audit-config.json`.** Later runs show them for you to confirm, rather than asking again. The file holds no secrets, and refuses any setting it doesn't recognize.
+5. **It asks for the repositories and branches.** It does this on every run, so an audit never reads the wrong code by accident.
+
+It then follows the same steps as below.
 
 The fixes in the playbook can also use Microsoft's [power-platform-skills](https://github.com/microsoft/power-platform-skills) plugins, which are optional.
 
@@ -133,6 +144,7 @@ customer-project/          Private repository
 ├── solutions/Core/        Unpacked solutions. Commit these
 ├── solutions/Sales/
 ├── sources/               Downloaded branches and site. Don't commit, and delete after the release
+├── audit-config.json      Solutions, environments and scope, saved by the agent
 ├── audit-sources.json     The repositories and branches for this run
 └── external-map.json      SharePoint and function app pairs
 ```
@@ -171,6 +183,16 @@ The commands below work in both shells. Where a command spans several lines, Pow
 az login --tenant <tenant-id>
 pac auth create --environment $DEV
 ```
+
+### 5. Check everything is ready
+
+Run this from your project folder. It prints a fix for anything missing, and shows which account and tenant you're signed in to, so you can confirm they're the customer's.
+
+```bash
+python "$TOOLS/check_setup.py"
+```
+
+It can't prove your access to an environment. The `--check` option in steps 7 and 10 does that.
 
 ## Phase 1: Inventory
 
@@ -301,12 +323,10 @@ Don't edit the `status` column. Run steps 9 and 10 again, and your explanations 
 
 > **Gate 2:** both maps say Gate 2 is ready. Commit `audit/` to the private repository.
 
-**With an AI agent**, steps 6 to 12 become one prompt:
+**With an AI agent**, steps 6 to 12 become one prompt. It asks for whatever it doesn't know:
 
 ```text
-Run solution-dependency-audit for the Core and Sales solutions, with <DEV url> as DEV and <PROD url> as production.
-Then run external-dependency-audit with external-map.json.
-Ask me which Azure DevOps repositories and branches to analyse. Don't assume the default branch.
+Run solution-dependency-audit, then external-dependency-audit.
 Confirm each environment with me before the first read, and the sandbox before any dry run.
 Check each text-scan hit and mark false positives. Explain any row found by only some sources.
 Report what still blocks Gate 2. Never turn a failed check into a clean result.

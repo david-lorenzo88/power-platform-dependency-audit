@@ -17,23 +17,22 @@ Run them from the customer's project folder, so results land in its `audit/` fol
 
 ## Steps
 
-### 1. Ask what's being released
+### 1. Set up
 
-Ask for these, unless the person has just given them:
+Read `${CLAUDE_PLUGIN_ROOT}/docs/agent-setup.md` and follow it before anything else. If that text wasn't replaced with a real path, the file is `../../docs/agent-setup.md` relative to this file. In that file, `<scripts>` means the scripts folder above.
 
-- The unique name of every solution in the release. A release can be several solutions.
-- The DEV URL, and the production URL or a fresh copy of production.
-
-If they don't know the names, run `pac solution list --environment <DEV>` and show the result. Use display names only to help them choose.
+It checks the tools and sign-ins, confirms the customer's tenant, and gives you the solutions, environments, scope and Azure DevOps projects in `audit-config.json`.
 
 ### 2. Ask which code to analyse
 
-Ask this on every run, even if you already know an answer from earlier:
+Ask this on every run, even if you already know an answer from earlier, and even if the config says the release has no custom code:
 
 - Which Azure DevOps repositories hold plug-ins and functions for this release?
 - Which branch of each repository is being released? Never assume the default branch.
 
-To help them choose, run:
+If `audit-sources.json` exists from an earlier run, show it as a starting point, and ask whether each repository and branch still applies. Never reuse it silently.
+
+To help them choose, run this with the organization and project from the config:
 
 ```
 python "${CLAUDE_PLUGIN_ROOT}/scripts/fetch_audit_sources.py" list-repos --organization <org> --project <project>
@@ -57,7 +56,13 @@ pac solution export --name <Target> --path ./build/<Target>.zip --managed false 
 pac solution unpack --zipfile ./build/<Target>.zip --folder ./solutions/<Target> --packagetype Unmanaged --allowWrite --allowDelete
 ```
 
-If the release includes a Power Pages site, download it to `./sources/site`.
+If the config includes a Power Pages site, download it to `./sources/site`, using its site ID:
+
+```
+pac pages download --path ./sources/site --webSiteId <site-id> --modelVersion 2 --environment <DEV>
+```
+
+For a code site, use `pac pages download-code-site --path ./sources/site --webSiteId <site-id> --environment <DEV>`.
 
 ### 4. Confirm the environments
 
@@ -69,7 +74,7 @@ python "${CLAUDE_PLUGIN_ROOT}/scripts/solution_dependency_audit.py" --target <Ta
 
 ### 5. Dry-run each target on a sandbox
 
-This is the only step that isn't read-only. Ask for a sandbox made from a copy of production. Never use shared DEV or production. Confirm the sandbox with the person, then for each target:
+This is the only step that isn't read-only. Use the sandbox from the config, which must be a copy of production. Never use shared DEV or production. Confirm the sandbox with the person, then for each target:
 
 ```
 pac solution export --name <Target> --path ./build/<Target>_managed.zip --managed true --overwrite --environment <DEV>
@@ -80,7 +85,7 @@ Each one writes `audit/stage-<Target>.json`. A failed dry run still writes its f
 
 If the script says the sandbox and production point to the same organization, stop and ask the person to check the admin center. Only pass `--allow-same-org-id` once they confirm they're separate environments.
 
-If the person can't provide a sandbox, carry on without this step and say that Gate 2 can't pass.
+If the config has no sandbox and the person can't provide one, carry on without this step and say that Gate 2 can't pass.
 
 ### 6. Run the audit
 
