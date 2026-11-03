@@ -1,0 +1,2 @@
+id,x_component_in_the_release,y_component_it_needs,owner_of_y,evidence,action,fix_type,approved_by,status
+D-4ae3d3c9,Core form,account.b_col,Project B owner,"dependencies.csv: In-flight, used by 2 components",Sever,Release-only,Project B owner,Approved

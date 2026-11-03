@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "power-platform-dependency-audit",
+  "description": "Skills that audit the dependencies of a Power Platform release.",
+  "owner": {
+    "name": "David Lorenzo López",
+    "url": "https://github.com/david-lorenzo88"
+  },
+  "plugins": [
+    {
+      "name": "dependency-audit",
+      "description": "Read-only audits of what a Power Platform release needs that production doesn't have: Dataverse solutions, plug-ins, Power Pages, SharePoint and Azure Functions.",
+      "source": "./",
+      "homepage": "https://github.com/david-lorenzo88/power-platform-dependency-audit"
+    }
+  ]
+}

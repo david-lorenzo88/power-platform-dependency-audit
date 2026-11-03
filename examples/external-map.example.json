@@ -1,0 +1,23 @@
+{
+  "sharepoint_sites": [
+    {
+      "dev": "https://contoso.sharepoint.com/sites/app-dev",
+      "prod": "https://contoso.sharepoint.com/sites/app"
+    }
+  ],
+  "function_apps": [
+    {
+      "dev": {
+        "subscription": "00000000-0000-0000-0000-000000000000",
+        "resource_group": "rg-app-dev",
+        "name": "func-app-dev"
+      },
+      "prod": {
+        "subscription": "00000000-0000-0000-0000-000000000000",
+        "resource_group": "rg-app-prod",
+        "name": "func-app"
+      },
+      "aliases": ["api-dev.contoso.com"]
+    }
+  ]
+}

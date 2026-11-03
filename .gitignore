@@ -1,0 +1,14 @@
+# Audit results and customer material never belong in this public repository.
+audit/
+sources/
+solutions/
+build/
+external-map.json
+audit-sources.json
+.env
+*.settings.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/

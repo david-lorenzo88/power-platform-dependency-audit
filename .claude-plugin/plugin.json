@@ -1,0 +1,14 @@
+{
+  "name": "dependency-audit",
+  "displayName": "Power Platform dependency audit",
+  "version": "1.0.0",
+  "description": "Read-only audits of what a Power Platform release needs that production doesn't have: Dataverse solutions, plug-ins, Power Pages, SharePoint and Azure Functions.",
+  "author": {
+    "name": "David Lorenzo López",
+    "url": "https://github.com/david-lorenzo88"
+  },
+  "homepage": "https://github.com/david-lorenzo88/power-platform-dependency-audit",
+  "repository": "https://github.com/david-lorenzo88/power-platform-dependency-audit",
+  "license": "MIT",
+  "keywords": ["power-platform", "dataverse", "solutions", "dependencies", "alm", "audit"]
+}

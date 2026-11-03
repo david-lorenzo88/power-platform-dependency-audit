@@ -1,0 +1,15 @@
+{
+  "repositories": [
+    {
+      "url": "https://dev.azure.com/contoso/App/_git/plugins",
+      "branch": "release/2026-11",
+      "kind": "plugins"
+    },
+    {
+      "url": "https://dev.azure.com/contoso/App/_git/functions",
+      "branch": "release/2026-11",
+      "kind": "functions",
+      "function_app": "func-app-dev"
+    }
+  ]
+}
