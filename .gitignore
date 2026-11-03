@@ -5,6 +5,7 @@ solutions/
 build/
 external-map.json
 audit-sources.json
+audit-config.json
 .env
 *.settings.json
 

@@ -17,11 +17,17 @@ Run them from the customer's project folder, so results land in its `audit/` fol
 
 ## Steps
 
-### 1. Pair the environments
+### 1. Set up
+
+Read `${CLAUDE_PLUGIN_ROOT}/docs/agent-setup.md` and follow it before anything else. If that text wasn't replaced with a real path, the file is `../../docs/agent-setup.md` relative to this file. In that file, `<scripts>` means the scripts folder above.
+
+If the config says the release includes neither SharePoint nor Azure Functions, tell the person this audit has nothing to check, and ask whether to run it anyway.
+
+### 2. Pair the environments
 
 Find or write `external-map.json`, which pairs every DEV SharePoint site and function app with its production one. See `examples/external-map.example.json` in the plugin. Ask the person for anything you don't know. Never guess a production pair. Anything missing from this file is reported as Unknown.
 
-### 2. Ask which code to analyse
+### 3. Ask which code to analyse
 
 If `solution-dependency-audit` ran just now in this session, reuse its `audit/sources-lock.json` and tell the person which branches it holds. Otherwise, ask on this run:
 
@@ -35,7 +41,7 @@ Then download them, as `solution-dependency-audit` describes:
 python "${CLAUDE_PLUGIN_ROOT}/scripts/fetch_audit_sources.py" fetch --manifest audit-sources.json
 ```
 
-### 3. Confirm what will be read
+### 4. Confirm what will be read
 
 Run the audit with `--check`, show the person what it prints, and wait for them to confirm.
 
@@ -43,7 +49,7 @@ Run the audit with `--check`, show the person what it prints, and wait for them 
 python "${CLAUDE_PLUGIN_ROOT}/scripts/external_dependency_audit.py" --map ./external-map.json --check
 ```
 
-### 4. Run the audit
+### 5. Run the audit
 
 Pass a `--scan-dir` for every unpacked solution in the release, and for the Power Pages site if there is one.
 
@@ -57,7 +63,7 @@ An Azure CLI token often lacks SharePoint access. If Microsoft Graph answers 401
 
 Exit code 0 means nothing needs action. Exit code 3 means the audit ran and rows are open. Exit code 1 means it couldn't run.
 
-### 5. Review and report
+### 6. Review and report
 
 Work through `audit/external-dependencies.csv`, and explain each Unknown row in `explanation`. `False positive: <reason>` closes a reference that isn't real. `Accepted: <reason>` closes one the person confirms will ship with the release, but never a hardcoded address. Write `Accepted` only when the person has told you, and record who.
 

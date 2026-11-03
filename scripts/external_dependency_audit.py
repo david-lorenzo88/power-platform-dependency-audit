@@ -43,7 +43,7 @@ from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple
 
 from solution_dependency_audit import (
     ApiError, AuditError, ReadOnlyClient, _md, _mermaid_text, _safe, _sources_markdown, _unsafe,
-    classify_code, iter_text_files, load_sources_lock, read_explanations, split_command,
+    classify_code, iter_text_files, load_sources_lock, make_output_safe, read_explanations, split_command,
 )
 
 __version__ = "1.0.0"
@@ -987,7 +987,7 @@ def token_from_command(command: str) -> Callable[[str], str]:
             raise AuditError("The token command is empty")
         executable = shutil.which(parts[0]) or parts[0]
         try:
-            result = subprocess.run([executable] + parts[1:], capture_output=True, text=True, timeout=180)
+            result = subprocess.run([executable] + parts[1:], capture_output=True, encoding="utf-8", errors="replace", timeout=180)
         except (OSError, subprocess.SubprocessError) as exc:
             raise AuditError(f"Could not run the token command '{parts[0]}': {exc}") from None
         token = result.stdout.strip()
@@ -1037,6 +1037,7 @@ def check(config: Config, sharepoint: SharePointReader, azure: FunctionReader) -
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    make_output_safe()
     args = parse_args(argv)
     try:
         for name, url in (("--graph-url", args.graph_url), ("--azure-url", args.azure_url)):

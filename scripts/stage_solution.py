@@ -39,7 +39,7 @@ from typing import Callable, Dict, List, Optional
 
 from solution_dependency_audit import (
     API_ROOT, ApiError, AuditError, ReadOnlyClient, _NoRedirect, _error_message, _retry_delay,
-    load_auth, norm_guid,
+    load_auth, make_output_safe, norm_guid,
 )
 
 __version__ = "1.0.0"
@@ -181,6 +181,7 @@ def validate(args: argparse.Namespace) -> None:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    make_output_safe()
     args = parse_args(argv)
     try:
         validate(args)

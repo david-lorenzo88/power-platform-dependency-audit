@@ -899,7 +899,7 @@ def load_sources_lock(path: Path) -> List[dict]:
 
 def _git_output(folder: Path, *arguments: str) -> str:
     try:
-        result = subprocess.run(["git", "-C", str(folder), *arguments], capture_output=True, text=True, timeout=120)
+        result = subprocess.run(["git", "-C", str(folder), *arguments], capture_output=True, encoding="utf-8", errors="replace", timeout=120)
     except (OSError, subprocess.SubprocessError) as exc:
         raise AuditError(f"Could not check '{folder}' with Git: {exc}") from None
     if result.returncode != 0:
@@ -2186,12 +2186,19 @@ def _mermaid_text(value: str) -> str:
 
 
 # Command line -------------------------------------------------------------------------
+def make_output_safe() -> None:
+    """A redirected Windows console can't print every name, and a name mustn't stop a script."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
+
+
 def az_token(base_url: str) -> str:
     """Ask the Azure CLI for a Dataverse token. It stays in memory and is never written down."""
     executable = shutil.which("az") or "az"
     command = [executable, "account", "get-access-token", "--resource", base_url.rstrip("/"), "--query", "accessToken", "-o", "tsv"]
     try:
-        result = subprocess.run(command, capture_output=True, text=True, timeout=180)
+        result = subprocess.run(command, capture_output=True, encoding="utf-8", errors="replace", timeout=180)
     except (OSError, subprocess.SubprocessError) as exc:
         raise AuditError(f"Could not run the Azure CLI: {exc}") from None
     token = result.stdout.strip()
@@ -2301,6 +2308,7 @@ def validate(args: argparse.Namespace) -> None:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    make_output_safe()
     args = parse_args(argv)
     try:
         validate(args)
